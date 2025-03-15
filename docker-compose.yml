@@ -64,3 +64,16 @@ services:
       - POSTGRES_USER=${POSGRES_DATABASE_USER}
       - POSTGRES_PASSWORD=${POSGRES_DATABASE_PASSWORD}
       - POSTGRES_DB=${POSGRES_DATABASE_DB}
+
+# Payments Microservice
+  # payments-ms:
+  #   build: ./payments-ms
+  #   volumes:
+  #     - ./payments-ms/src:/usr/src/app/src 
+  #   command: npm run start:dev
+  #   environment:
+  #     - PORT=${PAYMENTS-MS-PORT}
+  #     - SECRET_KEY_STRIPE=${SECRET_KEY_STRIPE}
+  #     - PUBLIC_KEY_STRIPE=${PUBLIC_KEY_STRIPE}
+  #     - PAYMENTS_SUCCESS=${PAYMENTS_SUCCESS}
+  #     - PAYMENTS_CANCELLED=${PAYMENTS_CANCELLED}
