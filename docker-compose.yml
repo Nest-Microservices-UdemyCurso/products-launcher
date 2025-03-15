@@ -1,0 +1,66 @@
+version: '3'
+
+services: 
+
+  nats-servers:
+    image: nats:latest
+    container_name: nats-server
+    ports: 
+      - 8222:8222
+
+# Client-gateway Microservice
+
+  client-gateway:
+    build: ./client-gateway
+    ports: 
+      - ${CLIENT_GATEWAY_PORT}:3000
+    volumes:
+      - ./client-gateway/src:/usr/src/app/src 
+    command: npm run start:dev
+    environment:
+      - PORT=${CLIENT_GATEWAY_PORT}
+      - PAGE=1
+      - LIMIT=10
+      - NATS_SERVERS=${NATS_SERVERS}
+
+# Products Microservice
+  products-ms:
+    build: ./products-ms
+    volumes:
+      - ./products-ms/src:/usr/src/app/src 
+    command: npm run start:dev
+    environment:
+      - PORT=3001
+      - PAGE=1
+      - LIMIT=10
+      - DATABASE_URL=file:./dev.db
+      - NATS_SERVERS=${NATS_SERVERS}
+
+# Orders Microservice
+  orders-ms:
+    depends_on:
+      - orders-db
+    build: ./orders-ms
+    volumes:
+      - ./orders-ms/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3002
+      - PAGE=1
+      - LIMIT=10
+      - DATABASE_URL=${DATABASE_URL_ORDERS}
+      - NATS_SERVERS=${NATS_SERVERS}
+
+# Orders DB
+  orders-db:
+    container_name: orders_databases
+    image: postgres:16.2
+    restart: always 
+    volumes:
+      - ./orders-ms/postgres:/var/lib/postgresql/data
+    ports: 
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSGRES_DATABASE_USER}
+      - POSTGRES_PASSWORD=${POSGRES_DATABASE_PASSWORD}
+      - POSTGRES_DB=${POSGRES_DATABASE_DB}
